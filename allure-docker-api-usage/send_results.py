@@ -7,6 +7,7 @@ allure_server = 'http://localhost:5050'
 # Project ID according to existent projects in your Allure container - Check endpoint for project creation >> `[POST]/projects`
 project_id = 'default'
 #project_id = 'my-project-id'
+BASE_PATH = os.environ.get('BASE_PATH', '/allure-docker-service')
 
 
 current_directory = os.path.dirname(os.path.realpath(__file__))
@@ -48,7 +49,7 @@ json_request_body = json.dumps(request_body)
 ssl_verification = True
 
 print("------------------SEND-RESULTS------------------")
-response = requests.post(allure_server + '/allure-docker-service/send-results?project_id=' + project_id, headers=headers, data=json_request_body, verify=ssl_verification)
+response = requests.post(allure_server + f"/{BASE_PATH}/send-results?project_id=" + project_id, headers=headers, data=json_request_body, verify=ssl_verification)
 print("STATUS CODE:")
 print(response.status_code)
 print("RESPONSE:")
@@ -62,7 +63,7 @@ print("------------------GENERATE-REPORT------------------")
 execution_name = 'execution from my script'
 execution_from = 'http://google.com'
 execution_type = 'teamcity'
-response = requests.get(allure_server + '/allure-docker-service/generate-report?project_id=' + project_id + '&execution_name=' + execution_name + '&execution_from=' + execution_from + '&execution_type=' + execution_type, headers=headers, verify=ssl_verification)
+response = requests.get(allure_server + f"/{BASE_PATH}/generate-report?project_id=" + project_id + '&execution_name=' + execution_name + '&execution_from=' + execution_from + '&execution_type=' + execution_type, headers=headers, verify=ssl_verification)
 print("STATUS CODE:")
 print(response.status_code)
 print("RESPONSE:")

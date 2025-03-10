@@ -14,7 +14,7 @@
    },
    "servers":[
       {
-         "url":"/allure-docker-service"
+         "url":"/allure-api"
       }
    ],
    "tags":[

@@ -422,7 +422,8 @@ def generate_security_swagger_spec():
         LOGGER.error(str(ex))
 
 ### swagger specific ###
-NATIVE_PREFIX = '/allure-docker-service'
+BASE_PATH = os.environ.get('BASE_PATH', 'allure-docker-service').strip('/')  # Ensure no leading/trailing slashes
+NATIVE_PREFIX = "/"+BASE_PATH
 SWAGGER_ENDPOINT = '/swagger'
 SWAGGER_SPEC_FILE = '/swagger.json'
 
@@ -446,7 +447,7 @@ app.register_blueprint(SWAGGERUI_BLUEPRINT, name="swagger", url_prefix=SWAGGER_E
 app.register_blueprint(SWAGGERUI_BLUEPRINT, name="swagger_path", url_prefix=SWAGGER_ENDPOINT_PATH)
 if URL_PREFIX:
     app.register_blueprint(SWAGGERUI_BLUEPRINT,
-        url_prefix='{}{}'.format(NATIVE_PREFIX, SWAGGER_ENDPOINT))
+        url_prefix='{}{}'.format(BASE_PATH, SWAGGER_ENDPOINT))
 ### end swagger specific ###
 
 ### Security Section
@@ -547,7 +548,7 @@ def after_request_func(response):
 
 ### Security Endpoints Section
 @app.route('/login', methods=['POST'], strict_slashes=False)
-@app.route('/allure-docker-service/login', methods=['POST'], strict_slashes=False)
+@app.route(f"/{BASE_PATH}/login", methods=['POST'], strict_slashes=False)
 def login_endpoint():
     try:
         if ENABLE_SECURITY_LOGIN is False:
@@ -608,7 +609,7 @@ def login_endpoint():
         return resp, 400
 
 @app.route('/logout', methods=['DELETE'], strict_slashes=False)
-@app.route('/allure-docker-service/logout', methods=['DELETE'], strict_slashes=False)
+@app.route(f"/{BASE_PATH}/logout", methods=['DELETE'], strict_slashes=False)
 @jwt_required
 def logout_endpoint():
     if ENABLE_SECURITY_LOGIN is False:
@@ -633,7 +634,7 @@ def logout_endpoint():
         return resp, 400
 
 @app.route('/logout-refresh-token', methods=['DELETE'], strict_slashes=False)
-@app.route('/allure-docker-service/logout-refresh-token', methods=['DELETE'], strict_slashes=False)
+@app.route(f"/{BASE_PATH}/logout-refresh-token", methods=['DELETE'], strict_slashes=False)
 @jwt_refresh_token_required
 def logout_refresh_token_endpoint():
     if ENABLE_SECURITY_LOGIN is False:
@@ -660,7 +661,7 @@ def logout_refresh_token_endpoint():
         return resp, 400
 
 @app.route('/refresh', methods=['POST'], strict_slashes=False)
-@app.route('/allure-docker-service/refresh', methods=['POST'], strict_slashes=False)
+@app.route(f"/{BASE_PATH}/refresh", methods=['POST'], strict_slashes=False)
 @jwt_refresh_token_required
 def refresh_endpoint():
     if ENABLE_SECURITY_LOGIN is False:
@@ -700,7 +701,7 @@ def refresh_endpoint():
 ### end Security Endpoints Section
 
 @app.route("/swagger.json")
-@app.route("/allure-docker-service/swagger.json", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/swagger.json", strict_slashes=False)
 def swagger_json_endpoint():
     try:
         specification_file = 'swagger.json'
@@ -710,8 +711,7 @@ def swagger_json_endpoint():
         if URL_PREFIX:
             spec = get_file_as_string("{}/swagger/{}".format(STATIC_CONTENT, specification_file))
             spec_json = eval(spec) #pylint: disable=eval-used
-            server_url = spec_json['servers'][0]['url']
-            spec_json['servers'][0]['url'] = '{}{}'.format(URL_PREFIX, server_url)
+            spec_json['servers'][0]['url'] = f"/{BASE_PATH}"
             return jsonify(spec_json)
 
         return send_file("{}/swagger/{}"
@@ -727,7 +727,7 @@ def swagger_json_endpoint():
         return resp
 
 @app.route("/version", strict_slashes=False)
-@app.route("/allure-docker-service/version", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/version", strict_slashes=False)
 def version_endpoint():
     try:
         version = get_file_as_string(ALLURE_VERSION).strip()
@@ -753,7 +753,7 @@ def version_endpoint():
     return resp
 
 @app.route("/config", strict_slashes=False)
-@app.route("/allure-docker-service/config", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/config", strict_slashes=False)
 @jwt_required
 def config_endpoint():
     try:
@@ -797,7 +797,7 @@ def config_endpoint():
         return resp
 
 @app.route("/select-language", strict_slashes=False)
-@app.route("/allure-docker-service/select-language", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/select-language", strict_slashes=False)
 @jwt_required
 def select_language_endpoint():
     try:
@@ -821,7 +821,7 @@ def select_language_endpoint():
         return resp
 
 @app.route("/latest-report", strict_slashes=False)
-@app.route("/allure-docker-service/latest-report", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/latest-report", strict_slashes=False)
 @jwt_required
 def latest_report_endpoint():
     try:
@@ -851,7 +851,7 @@ def latest_report_endpoint():
         return resp
 
 @app.route("/send-results", methods=['POST'], strict_slashes=False)
-@app.route("/allure-docker-service/send-results", methods=['POST'], strict_slashes=False)
+@app.route(f"/{BASE_PATH}/send-results", methods=['POST'], strict_slashes=False)
 @jwt_required
 def send_results_endpoint(): #pylint: disable=too-many-branches
     try:
@@ -947,7 +947,7 @@ def send_results_endpoint(): #pylint: disable=too-many-branches
     return resp
 
 @app.route("/generate-report", strict_slashes=False)
-@app.route("/allure-docker-service/generate-report", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/generate-report", strict_slashes=False)
 @jwt_required
 def generate_report_endpoint():
     try:
@@ -1040,7 +1040,7 @@ def generate_report_endpoint():
     return resp
 
 @app.route("/clean-history", strict_slashes=False)
-@app.route("/allure-docker-service/clean-history", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/clean-history", strict_slashes=False)
 @jwt_required
 def clean_history_endpoint():
     try:
@@ -1081,7 +1081,7 @@ def clean_history_endpoint():
     return resp
 
 @app.route("/clean-results", strict_slashes=False)
-@app.route("/allure-docker-service/clean-results", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/clean-results", strict_slashes=False)
 @jwt_required
 def clean_results_endpoint():
     try:
@@ -1123,7 +1123,7 @@ def clean_results_endpoint():
     return resp
 
 @app.route("/emailable-report/render", strict_slashes=False)
-@app.route("/allure-docker-service/emailable-report/render", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/emailable-report/render", strict_slashes=False)
 @jwt_required
 def emailable_report_render_endpoint():
     try:
@@ -1185,7 +1185,7 @@ def emailable_report_render_endpoint():
         return report
 
 @app.route("/emailable-report/export", strict_slashes=False)
-@app.route("/allure-docker-service/emailable-report/export", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/emailable-report/export", strict_slashes=False)
 @jwt_required
 def emailable_report_export_endpoint():
     try:
@@ -1221,7 +1221,7 @@ def emailable_report_export_endpoint():
         return report
 
 @app.route("/report/export", strict_slashes=False)
-@app.route("/allure-docker-service/report/export", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/report/export", strict_slashes=False)
 @jwt_required
 def report_export_endpoint():
     try:
@@ -1258,7 +1258,7 @@ def report_export_endpoint():
             data,
             mimetype='application/zip',
             as_attachment=True,
-            download_name='allure-docker-service-report.zip'
+            download_name=f"{BASE_PATH}-report.zip"
         )
     except Exception as ex:
         body = {
@@ -1271,7 +1271,7 @@ def report_export_endpoint():
         return resp
 
 @app.route("/projects", methods=['POST'], strict_slashes=False)
-@app.route("/allure-docker-service/projects", methods=['POST'], strict_slashes=False)
+@app.route(f"/{BASE_PATH}/projects", methods=['POST'], strict_slashes=False)
 @jwt_required
 def create_project_endpoint():
     try:
@@ -1304,7 +1304,7 @@ def create_project_endpoint():
     return resp
 
 @app.route('/projects/<project_id>', methods=['DELETE'], strict_slashes=False)
-@app.route("/allure-docker-service/projects/<project_id>", methods=['DELETE'], strict_slashes=False)
+@app.route(f"/{BASE_PATH}/projects/<project_id>", methods=['DELETE'], strict_slashes=False)
 @jwt_required
 def delete_project_endpoint(project_id):
     try:
@@ -1345,7 +1345,7 @@ def delete_project_endpoint(project_id):
     return resp
 
 @app.route('/projects/<project_id>', strict_slashes=False)
-@app.route("/allure-docker-service/projects/<project_id>", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/projects/<project_id>", strict_slashes=False)
 @jwt_required
 def get_project_endpoint(project_id):
     try:
@@ -1412,7 +1412,7 @@ def get_project_endpoint(project_id):
         return resp
 
 @app.route('/projects', strict_slashes=False)
-@app.route("/allure-docker-service/projects", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/projects", strict_slashes=False)
 @jwt_required
 def get_projects_endpoint():
     try:
@@ -1441,7 +1441,7 @@ def get_projects_endpoint():
         return resp
 
 @app.route('/projects/search', strict_slashes=False)
-@app.route("/allure-docker-service/projects/search", strict_slashes=False)
+@app.route(f"/{BASE_PATH}/projects/search", strict_slashes=False)
 @jwt_required
 def get_projects_search_endpoint():
     try:
@@ -1478,7 +1478,7 @@ def get_projects_search_endpoint():
         return resp
 
 @app.route('/projects/<project_id>/reports/<path:path>')
-@app.route("/allure-docker-service/projects/<project_id>/reports/<path:path>")
+@app.route(f"/{BASE_PATH}/projects/<project_id>/reports/<path:path>")
 @jwt_required
 def get_reports_endpoint(project_id, path):
     try:

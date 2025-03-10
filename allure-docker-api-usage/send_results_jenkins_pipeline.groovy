@@ -15,9 +15,10 @@ allure_server_url = 'http://localhost:5050'
 // Project ID according to existent projects in your Allure container - Check endpoint for project creation >> `[POST]/projects`
 project_id = 'default'
 //project_id = 'my-project-id'
+BASE_PATH = os.environ.get('BASE_PATH', '/allure-docker-service')
 
 // This directory is where you have all your results, generally named as `allure-results`
-// For the example we are using the results located in 'allure-docker-service/allure-docker-api-usage/allure-results-example'
+// For the example we are using the results located in '{BASE_PATH}/allure-docker-api-usage/allure-results-example'
 // Finish the pattern just with 1 asterisk. On this way you avoid to include recursive directories and only you are including files from the first directory level.
 pattern_allure_results_directory = '**/**/allure-results-example/*'
 
@@ -39,7 +40,7 @@ String build_allure_results_json(pattern) {
 }
 
 Object send_results_to_allure_docker_service(allure_server_url, project_id, results_json) {
-    httpRequest url: "${allure_server_url}/allure-docker-service/send-results?project_id=${project_id}",
+    httpRequest url: "${allure_server_url}/${BASE_PATH}/send-results?project_id=${project_id}",
                 httpMode: 'POST',
                 contentType: 'APPLICATION_JSON',
                 requestBody: results_json,
@@ -52,7 +53,7 @@ Object generate_allure_report(allure_server_url, project_id, execution_name, exe
     execution_from = URLEncoder.encode(execution_from, 'UTF-8')
     execution_type = URLEncoder.encode(execution_type, 'UTF-8')
 
-    httpRequest url: "${allure_server_url}/allure-docker-service/generate-report?project_id=${project_id}&execution_name=${execution_name}&execution_from=${execution_from}&execution_type=${execution_type}",
+    httpRequest url: "${allure_server_url}/${BASE_PATH}/generate-report?project_id=${project_id}&execution_name=${execution_name}&execution_from=${execution_from}&execution_type=${execution_type}",
                 httpMode: 'GET',
                 contentType: 'APPLICATION_JSON',
                 consoleLogResponseBody: true,

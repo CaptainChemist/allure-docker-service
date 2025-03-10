@@ -10,6 +10,7 @@ project_id = 'default'
 # Set security_user & security_password according to Allure container configuration
 security_user='my_username'
 security_password='my_password'
+BASE_PATH = os.environ.get('BASE_PATH', '/allure-docker-service')
 
 current_directory = os.path.dirname(os.path.realpath(__file__))
 results_directory = current_directory + allure_results_directory
@@ -57,7 +58,7 @@ credentials_body = {
 json_credentials_body = json.dumps(credentials_body)
 
 session = requests.Session()
-response = session.post(allure_server + '/allure-docker-service/login', headers=headers, data=json_credentials_body, verify=ssl_verification)
+response = session.post(allure_server + f"/{BASE_PATH}/login", headers=headers, data=json_credentials_body, verify=ssl_verification)
 
 print("STATUS CODE:")
 print(response.status_code)
@@ -70,7 +71,7 @@ print("CSRF-ACCESS-TOKEN: " + csrf_access_token)
 
 print("------------------SEND-RESULTS------------------")
 headers['X-CSRF-TOKEN'] = csrf_access_token
-response = session.post(allure_server + '/allure-docker-service/send-results?project_id=' + project_id, headers=headers, data=json_request_body, verify=ssl_verification)
+response = session.post(allure_server + f"/{BASE_PATH}/send-results?project_id=" + project_id, headers=headers, data=json_request_body, verify=ssl_verification)
 print("STATUS CODE:")
 print(response.status_code)
 print("RESPONSE:")
@@ -84,7 +85,7 @@ print("------------------GENERATE-REPORT------------------")
 execution_name = 'execution from my script'
 execution_from = 'http://google.com'
 execution_type = 'teamcity'
-response = session.get (allure_server + '/allure-docker-service/generate-report?project_id=' + project_id + '&execution_name=' + execution_name + '&execution_from=' + execution_from + '&execution_type=' + execution_type, headers=headers, verify=ssl_verification)
+response = session.get (allure_server + f"/{BASE_PATH}/generate-report?project_id=" + project_id + '&execution_name=' + execution_name + '&execution_from=' + execution_from + '&execution_type=' + execution_type, headers=headers, verify=ssl_verification)
 print("STATUS CODE:")
 print(response.status_code)
 print("RESPONSE:")

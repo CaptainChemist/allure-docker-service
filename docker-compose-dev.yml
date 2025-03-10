@@ -1,16 +1,17 @@
 version: '3'
 
 volumes:
-  allure-docker-service:
+  allure-api:
     driver: local
 
 services:
-  allure-docker-service:
+  allure-api:
     build:
       context: ../allure-docker-service
       dockerfile: docker-custom/Dockerfile.bionic-custom
       args:
         ALLURE_RELEASE: "2.27.0"
+        BASE_PATH: "${ALLURE_DOCKER_SERVICE_API_PATH}"
     environment:
       DEV_MODE: 0
       CHECK_RESULTS_EVERY_SECONDS: NONE
@@ -26,6 +27,7 @@ services:
       OPTIMIZE_STORAGE: 0
       API_RESPONSE_LESS_VERBOSE: 0
       TLS: 0
+      BASE_PATH: "${ALLURE_DOCKER_SERVICE_API_PATH}"
     ports:
       - "${ALLURE_DOCKER_SERVICE_API_PORT}:5050"
     volumes:

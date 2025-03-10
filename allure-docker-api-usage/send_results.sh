@@ -4,6 +4,12 @@
 ALLURE_RESULTS_DIRECTORY='allure-results-example'
 # This url is where the Allure container is deployed. We are using localhost as example
 ALLURE_SERVER='http://localhost:5050'
+# Use BASE_PATH if set, otherwise default to 'allure-docker-service'
+# Get BASE_PATH from environment with fallback to default value
+BASE_PATH="${BASE_PATH:-allure-docker-service}"
+# Strip any leading/trailing slashes
+BASE_PATH="${BASE_PATH#/}"
+BASE_PATH="${BASE_PATH%/}"
 # Project ID according to existent projects in your Allure container - Check endpoint for project creation >> `[POST]/projects`
 PROJECT_ID='default'
 #PROJECT_ID='my-project-id'
@@ -21,7 +27,7 @@ done
 
 set -o xtrace
 echo "------------------SEND-RESULTS------------------"
-curl -X POST "$ALLURE_SERVER/allure-docker-service/send-results?project_id=$PROJECT_ID" -H 'Content-Type: multipart/form-data' $FILES -ik
+curl -X POST "$ALLURE_SERVER/$BASE_PATH/send-results?project_id=$PROJECT_ID" -H 'Content-Type: multipart/form-data' $FILES -ik
 
 
 #If you want to generate reports on demand use the endpoint `GET /generate-report` and disable the Automatic Execution >> `CHECK_RESULTS_EVERY_SECONDS: NONE`
@@ -31,7 +37,7 @@ curl -X POST "$ALLURE_SERVER/allure-docker-service/send-results?project_id=$PROJ
 #EXECUTION_TYPE='bamboo'
 
 #You can try with a simple curl
-#RESPONSE=$(curl -X GET "$ALLURE_SERVER/allure-docker-service/generate-report?project_id=$PROJECT_ID&execution_name=$EXECUTION_NAME&execution_from=$EXECUTION_FROM&execution_type=$EXECUTION_TYPE" $FILES)
+#RESPONSE=$(curl -X GET "$ALLURE_SERVER/$BASE_PATH/generate-report?project_id=$PROJECT_ID&execution_name=$EXECUTION_NAME&execution_from=$EXECUTION_FROM&execution_type=$EXECUTION_TYPE" $FILES)
 #ALLURE_REPORT=$(grep -o '"report_url":"[^"]*' <<< "$RESPONSE" | grep -o '[^"]*$')
 
 #OR You can use JQ to extract json values -> https://stedolan.github.io/jq/download/

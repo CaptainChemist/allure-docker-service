@@ -18,9 +18,10 @@ project_id = 'default'
 // Set security_user & security_password according to Allure container configuration
 security_user = 'my_username'
 security_password = 'my_password'
+BASE_PATH = os.environ.get('BASE_PATH', '/allure-docker-service')
 
 // This directory is where you have all your results, generally named as `allure-results`
-// For the example we are using the results located in 'allure-docker-service/allure-docker-api-usage/allure-results-example'
+// For the example we are using the results located in '{BASE_PATH}/allure-docker-api-usage/allure-results-example'
 // Finish the pattern just with 1 asterisk. On this way you avoid to include recursive directories and only you are including files from the first directory level.
 pattern_allure_results_directory = '**/**/allure-results-example/*'
 
@@ -59,7 +60,7 @@ Object get_cookie_value(cookie) {
 
 Object login_to_allure_docker_service(allure_server_url, username, password) {
     def json_credential = JsonOutput.toJson(username: username, password: password)
-    httpRequest url: "${allure_server_url}/allure-docker-service/login",
+    httpRequest url: "${allure_server_url}/${BASE_PATH}/login",
                 httpMode: 'POST',
                 contentType: 'APPLICATION_JSON',
                 requestBody: json_credential,
@@ -68,7 +69,7 @@ Object login_to_allure_docker_service(allure_server_url, username, password) {
 }
 
 Object send_results_to_allure_docker_service(allure_server_url, cookies, csrf_access_token, project_id, results_json) {
-    httpRequest url: "${allure_server_url}/allure-docker-service/send-results?project_id=${project_id}",
+    httpRequest url: "${allure_server_url}/${BASE_PATH}/send-results?project_id=${project_id}",
                 httpMode: 'POST',
                 contentType: 'APPLICATION_JSON',
                 customHeaders: [ 
@@ -85,7 +86,7 @@ Object generate_allure_report(allure_server_url, cookies, csrf_access_token, pro
     execution_from = URLEncoder.encode(execution_from, 'UTF-8')
     execution_type = URLEncoder.encode(execution_type, 'UTF-8')
 
-    httpRequest url: "${allure_server_url}/allure-docker-service/generate-report?project_id=${project_id}&execution_name=${execution_name}&execution_from=${execution_from}&execution_type=${execution_type}",
+    httpRequest url: "${allure_server_url}/${BASE_PATH}/generate-report?project_id=${project_id}&execution_name=${execution_name}&execution_from=${execution_from}&execution_type=${execution_type}",
                 httpMode: 'GET',
                 contentType: 'APPLICATION_JSON',
                 customHeaders: [ 
