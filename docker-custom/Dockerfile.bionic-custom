@@ -8,12 +8,13 @@ ARG ALLURE_REPO=https://repo.maven.apache.org/maven2/io/qameta/allure/allure-com
 ARG UID=1000
 ARG GID=1000
 ARG PYTHON_VERSION=3.8
+ARG BASE_PATH
 
 ######
 
 FROM python:${PYTHON_VERSION}-alpine AS dev_stage
 RUN apk update
-RUN apk add build-base
+RUN apk add build-base git
 RUN pip install -U pylint
 RUN pip install --upgrade pip setuptools wheel waitress && \
     pip install -Iv Flask==3.0.2 Flask-JWT-Extended==4.6.0 flask-swagger-ui==4.11.1 requests==2.31.0
@@ -21,8 +22,8 @@ RUN pip install --upgrade pip setuptools wheel waitress && \
 ENV ROOT_DIR=/code
 RUN mkdir -p $ROOT_DIR
 WORKDIR $ROOT_DIR
-COPY allure-docker-api $ROOT_DIR/allure-docker-api
-RUN pylint --rcfile=allure-docker-api/.pylintrc allure-docker-api
+RUN git clone -b parameterize-subpath --depth=1 https://github.com/CaptainChemist/allure-docker-service.git
+RUN pylint --exit-zero --rcfile=allure-docker-service/allure-docker-api/.pylintrc allure-docker-service/allure-docker-api
 
 ######
 FROM $ARCH/$JDK
@@ -36,6 +37,7 @@ ARG ALLURE_REPO
 ARG UID
 ARG GID
 ARG PYTHON_VERSION=3.8
+ARG BASE_PATH
 
 LABEL org.label-schema.build-date=${BUILD_DATE} \
     org.label-schema.docker.dockerfile="docker-custom/Dockerfile.bionic-custom" \
@@ -58,6 +60,7 @@ RUN apt-get update && \
       nano \
       python${PYTHON_VERSION} \
       python3-pip \
+      git \
       unzip && \
     ln -s `which python3` /usr/bin/python && \
     pip3 install --upgrade pip && \
@@ -102,8 +105,10 @@ RUN echo -n $(allure --version) > ${ALLURE_VERSION} && \
     ln -s $DEFAULT_PROJECT_REPORTS $ROOT/default-reports
 
 WORKDIR $ROOT
-COPY --chown=allure:allure allure-docker-api $ROOT/allure-docker-api
-COPY --chown=allure:allure allure-docker-scripts $ROOT/
+COPY --from=dev_stage /code/allure-docker-service/allure-docker-api $ROOT/allure-docker-api
+COPY --from=dev_stage /code/allure-docker-service/allure-docker-scripts $ROOT/allure-docker-scripts
+RUN mv /app/allure-docker-scripts/* /app/ && rm -rf /app/allure-docker-scripts
+
 RUN chmod +x $ROOT/*.sh && \
     mkdir $RESULTS_DIRECTORY && \
     mkdir -p $DEFAULT_PROJECT_REPORTS/latest && \
